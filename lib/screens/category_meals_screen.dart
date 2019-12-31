@@ -1,22 +1,47 @@
-import 'package:delimeals/widgets/meal_item.dart';
 import 'package:flutter/material.dart';
 
 import '../dummy_data.dart.dart';
+import '../models/meal.dart';
+import '../widgets/meal_item.dart';
 
-class CategoryMealsScreen extends StatelessWidget {
+class CategoryMealsScreen extends StatefulWidget {
   static const String routeName = 'category-meals';
 
   @override
-  Widget build(BuildContext context) {
-    final routeArgs =
-        ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-    final String categoryTitle = routeArgs['title'];
-    final Color categoryColor = routeArgs['color'];
-    final String categoryId = routeArgs['id'];
-    final categoryMeals = DUMMY_MEALS
-        .where((meal) => meal.categories.contains(categoryId))
-        .toList();
+  _CategoryMealsScreenState createState() => _CategoryMealsScreenState();
+}
 
+class _CategoryMealsScreenState extends State<CategoryMealsScreen> {
+  String categoryTitle;
+  Color categoryColor;
+  String categoryId;
+  List<Meal> categoryMeals;
+  bool _isInit = true;
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      final routeArgs =
+          ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
+      categoryTitle = routeArgs['title'];
+      categoryColor = routeArgs['color'];
+      categoryId = routeArgs['id'];
+      categoryMeals = DUMMY_MEALS
+          .where((meal) => meal.categories.contains(categoryId))
+          .toList();
+      _isInit = false;
+    }
+    super.didChangeDependencies();
+  }
+
+  void _removeMeal(String id) {
+    setState(() {
+      categoryMeals.removeWhere((meal) => meal.id == id);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(categoryTitle),
@@ -33,6 +58,7 @@ class CategoryMealsScreen extends StatelessWidget {
             affordability: meal.affordability,
             complexity: meal.complexity,
             duration: meal.duration,
+            removeMeal: _removeMeal,
           );
         },
       ),
